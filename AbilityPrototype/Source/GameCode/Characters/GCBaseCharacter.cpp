@@ -14,6 +14,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/PlayerController.h"
 #include "Actors/Equipment/Weapons/MeleeWeaponItem.h"
+#include "AbilitySystem/GCAbilitySystemComponent.h"
 
 AGCBaseCharacter::AGCBaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UGCBaseCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -28,6 +29,8 @@ AGCBaseCharacter::AGCBaseCharacter(const FObjectInitializer& ObjectInitializer)
 
 	CharacterAttributesComponent = CreateDefaultSubobject<UCharacterAttributesComponent>(TEXT("CharacterAttributes"));
 	CharacterEquipmentComponent = CreateDefaultSubobject<UCharacterEquipmentComponent>(TEXT("CharacterEquipment"));
+
+	AbilitySystemComponent = CreateDefaultSubobject<UGCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 void AGCBaseCharacter::BeginPlay()
@@ -317,6 +320,18 @@ void AGCBaseCharacter::SecondaryMeleeAttack()
 	}
 }
 
+void AGCBaseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	InitGameplayAbilitySystem(NewController);
+}
+
+UAbilitySystemComponent* AGCBaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 bool AGCBaseCharacter::CanJumpInternal_Implementation() const
 {
 	return Super::CanJumpInternal_Implementation() && !GetBaseCharacterMovementComponent()->IsMantling();
@@ -341,6 +356,20 @@ void AGCBaseCharacter::UpdateStamina(float DeltaTime)
 	}
 
 	DebugDrawStamina();
+}
+
+void AGCBaseCharacter::InitGameplayAbilitySystem(AController* NewController)
+{
+	AbilitySystemComponent->InitAbilityActorInfo(NewController, this);
+
+	if (!bIsAbilitiesInitialized)
+	{
+		for (TSubclassOf<UGameplayAbility>& AbilityClass : Abilities)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityClass));
+		}
+		bIsAbilitiesInitialized = true;
+	}
 }
 
 void AGCBaseCharacter::UpdateIKSettings(float DeltaSeconds)

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
+#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "GCBaseCharacter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -46,7 +48,7 @@ class UGCBaseCharacterMovementComponent;
 class UCharacterAttributesComponent;
 class UCharacterEquipmentComponent;
 UCLASS(Abstract, NotBlueprintable)
-class GAMECODE_API AGCBaseCharacter : public ACharacter
+class GAMECODE_API AGCBaseCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -130,6 +132,12 @@ public:
 
 	void PrimaryMeleeAttack();
 	void SecondaryMeleeAttack();
+
+	virtual void PossessedBy(AController* NewController) override;
+
+/**	 IAbilitySystemInterface */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;	
+/**	 ~IAbilitySystemInterface */
 protected:
 	// ~ begin IK settings
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config|IK Setting")
@@ -213,7 +221,26 @@ protected:
 
 	virtual void OnStopAimingInternal();
 
+	// AbilitySystem
+	class UGCAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
+	TArray<TSubclassOf<class UGameplayAbility>> Abilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
+	FGameplayTag CrouchAbilityTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
+	FGameplayTag SpecialAbilityTag;
+
+	bool bIsAbilitiesInitialized = false;
+
+	bool bIsSpecialAbilityCanActive = false;
+	// ~AbilitySystem
+
 private:
+	void InitGameplayAbilitySystem(AController* NewController);
+
 	void UpdateIKSettings(float DeltaSeconds);
 
 	/**

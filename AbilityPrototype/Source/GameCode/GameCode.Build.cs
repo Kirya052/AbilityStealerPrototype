@@ -8,7 +8,17 @@ public class GameCode : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Niagara", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] 
+		{	"Core",
+			"CoreUObject", 
+			"Engine", 
+			"InputCore", 
+			"Niagara", 
+			"UMG",
+            "GameplayTasks",
+            "GameplayTags",
+            "GameplayAbilities"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
