@@ -15,6 +15,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Actors/Equipment/Weapons/MeleeWeaponItem.h"
 #include "AbilitySystem/GCAbilitySystemComponent.h"
+#include "AIModule/Classes/AIController.h"
+#include "AbilitySystem/AttributeSet/GCCharacterAttributeSet.h"
 
 AGCBaseCharacter::AGCBaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UGCBaseCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -31,6 +33,8 @@ AGCBaseCharacter::AGCBaseCharacter(const FObjectInitializer& ObjectInitializer)
 	CharacterEquipmentComponent = CreateDefaultSubobject<UCharacterEquipmentComponent>(TEXT("CharacterEquipment"));
 
 	AbilitySystemComponent = CreateDefaultSubobject<UGCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
+	AttributeSet  = CreateDefaultSubobject<UGCCharacterAttributeSet>(TEXT("AttributeSet"));
 }
 
 void AGCBaseCharacter::BeginPlay()
@@ -79,23 +83,50 @@ void AGCBaseCharacter::Tick(float DeltaTime)
 
 void AGCBaseCharacter::StartFire()
 {
+	AbilitySystemComponent->TryActivateAbilityWithTag(FireAbilityTag);
+}
+
+void AGCBaseCharacter::StopFire()
+{
+	AbilitySystemComponent->TryCancelAbilityWithTag(FireAbilityTag);
+}
+
+bool AGCBaseCharacter::CanFire()
+{
 	if (CharacterEquipmentComponent->IsEquipping())
 	{
-		return;
+		return false;
 	}
 	ARangeWeaponItem* CurrentRangeWeapon = CharacterEquipmentComponent->GetCurrentRangeWeapon();
 	if (IsValid(CurrentRangeWeapon))
 	{
-		CurrentRangeWeapon->StartFire();
+		return CurrentRangeWeapon->CanShoot();
+	}
+	return false;
+}
+
+void AGCBaseCharacter::StartShoot()
+{
+	ARangeWeaponItem* CurrentRangeWeapon = CharacterEquipmentComponent->GetCurrentRangeWeapon();
+	CurrentRangeWeapon->StartFire();
+
+	if (Team == ETeams::Player)
+	{
+		AbilitySystemComponent->TryActivateAbilityWithTag(FireCallBackTag);
 	}
 }
 
-void AGCBaseCharacter::StopFire()
+void AGCBaseCharacter::StopShoot()
 {
 	ARangeWeaponItem* CurrentRangeWeapon = CharacterEquipmentComponent->GetCurrentRangeWeapon();
 	if (IsValid(CurrentRangeWeapon))
 	{
 		CurrentRangeWeapon->StopFire();
+	}
+
+	if (Team == ETeams::Player)
+	{
+		AbilitySystemComponent->TryCancelAbilityWithTag(FireCallBackTag);
 	}
 }
 
@@ -324,12 +355,29 @@ void AGCBaseCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	AAIController* AIController = Cast<AAIController>(NewController);
+	if (IsValid(AIController))
+	{
+		FGenericTeamId TeamId((uint8)Team);
+		AIController->SetGenericTeamId(TeamId);
+	}
+
 	InitGameplayAbilitySystem(NewController);
 }
 
-UAbilitySystemComponent* AGCBaseCharacter::GetAbilitySystemComponent() const
+FGenericTeamId AGCBaseCharacter::GetGenericTeamId() const
+{
+	return FGenericTeamId((uint8)Team);
+}
+
+UAbilitySystemComponent* AGCBaseCharacter::GetAbilitySystemComponent() const 
 {
 	return AbilitySystemComponent;
+}
+
+UGCCharacterAttributeSet* AGCBaseCharacter::GetCharacterAttributeSet()
+{
+	return AttributeSet;
 }
 
 bool AGCBaseCharacter::CanJumpInternal_Implementation() const

@@ -3,11 +3,14 @@
 
 #include "GCAICharacter.h"
 #include "Components/CharacterComponents/AIPatrollingComponent.h"
+#include "GameCodeTypes.h"
 
 AGCAICharacter::AGCAICharacter(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	AIPatrollingComponent = CreateDefaultSubobject<UAIPatrollingComponent>(TEXT("AIPatrolling"));
+
+	Team = ETeams::Enemy;
 }
 
 UAIPatrollingComponent* AGCAICharacter::GetPatrollingComponent() const

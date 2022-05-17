@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
+#include "GameCodeTypes.h"
+#include "AIModule/Classes/GenericTeamAgentInterface.h"
 #include "GCBaseCharacter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -47,8 +49,9 @@ class AInteractiveActor;
 class UGCBaseCharacterMovementComponent;
 class UCharacterAttributesComponent;
 class UCharacterEquipmentComponent;
+class UGCCharacterAttributeSet;
 UCLASS(Abstract, NotBlueprintable)
-class GAMECODE_API AGCBaseCharacter : public ACharacter, public IAbilitySystemInterface
+class GAMECODE_API AGCBaseCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -76,6 +79,10 @@ public:
 
 	void StartFire();
 	void StopFire();
+	bool CanFire();
+
+	void StartShoot();
+	void StopShoot();
 
 	void StartAiming();
 	void StopAiming();
@@ -135,9 +142,22 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 
-/**	 IAbilitySystemInterface */
+	/** IGenericTeamAgentInterface */
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	/** ~IGenericTeamAgentInterface */
+
+	/**	IAbilitySystemInterface */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;	
-/**	 ~IAbilitySystemInterface */
+	/**	~IAbilitySystemInterface */
+
+	FORCEINLINE ETeams GetCharacterTeam() const { return Team; };
+
+	//AbilitySystem
+	UFUNCTION(BlueprintCallable)
+	UGCCharacterAttributeSet* GetCharacterAttributeSet();
+
+	FORCEINLINE FGameplayTag GetFireCallbackTag() const { return FireCallBackTag; };
+	//~AbilitySystem
 protected:
 	// ~ begin IK settings
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config|IK Setting")
@@ -217,6 +237,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character | Components")
 	UCharacterEquipmentComponent* CharacterEquipmentComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character | Team")
+	ETeams Team = ETeams::Player;
+
 	virtual void OnStartAimingInternal();
 
 	virtual void OnStopAimingInternal();
@@ -227,8 +250,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
 	TArray<TSubclassOf<class UGameplayAbility>> Abilities;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Attributes")
+	UGCCharacterAttributeSet* AttributeSet;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
-	FGameplayTag CrouchAbilityTag;
+	FGameplayTag FireAbilityTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
+	FGameplayTag FireCallBackTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	FGameplayTag SpecialAbilityTag;
