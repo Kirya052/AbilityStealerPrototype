@@ -7,6 +7,7 @@
 #include "ReticleWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "AmmoWidget.h"
+#include "AbilitySystem/AttributeSet/GCCharacterAttributeSet.h"
 
 UReticleWidget* UPlayerHUDWidget::GetReticleWidget()
 {
@@ -25,7 +26,7 @@ float UPlayerHUDWidget::GetHealthPercent() const
 	AGCBaseCharacter* Character = Cast<AGCBaseCharacter>(Pawn);
 	if (IsValid(Character))
 	{
-		const UCharacterAttributesComponent* CharacterAttributes = Character->GetCharacterAttributesComponent();
+		UGCCharacterAttributeSet* CharacterAttributes = Character->GetCharacterAttributeSet();
 		Result = CharacterAttributes->GetHealthPercent();
 	}
 	return Result;
