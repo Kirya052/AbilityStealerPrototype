@@ -76,6 +76,8 @@ public:
 	bool IsOnLadder() const;
 	const class ALadder* GetCurrentLadder();
 
+	bool bCanChangeBoostSpeed = true;
+
 protected:
 	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
 

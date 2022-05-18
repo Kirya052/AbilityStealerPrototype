@@ -43,6 +43,18 @@ struct FMantlingSettings
 	float MinHeightStartTime = 0.5f;
 };
 
+USTRUCT(BlueprintType)
+struct FSpecialAbilityStruct
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag AbilityTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 AbilityCount = 1;
+};
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAimingStateChanged, bool)
 
 class AInteractiveActor;
@@ -140,6 +152,8 @@ public:
 	void PrimaryMeleeAttack();
 	void SecondaryMeleeAttack();
 
+	void EnableRagdoll();
+
 	virtual void PossessedBy(AController* NewController) override;
 
 	/** IGenericTeamAgentInterface */
@@ -156,7 +170,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UGCCharacterAttributeSet* GetCharacterAttributeSet();
 
-	FORCEINLINE FGameplayTag GetFireCallbackTag() const { return FireCallBackTag; };
+	UFUNCTION(BlueprintCallable)
+	void SetSpecialAbility(FSpecialAbilityStruct SpecialAbilityStruct);
+
+	FORCEINLINE FGameplayTag GetSpecialAbilityTag() const { return SpecialAbilityTag; };
+
+	void ActivateSpecialAbility();
+	bool CanActivateSpecialAbility();
+
+	int32 AbilityCount = 0;
 	//~AbilitySystem
 protected:
 	// ~ begin IK settings
@@ -303,7 +325,6 @@ private:
 	const FMantlingSettings& GetMantlingSettings(float LedgeHeight) const;
 
 	TArray<AInteractiveActor*> AvailableInteractiveActors;
-	void EnableRagdoll();
 
 	FVector CurrentFallApex;
 };

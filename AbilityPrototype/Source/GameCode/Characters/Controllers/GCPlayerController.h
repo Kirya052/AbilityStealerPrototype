@@ -68,6 +68,8 @@ private:
 	void Debug_DecreaseGlobalDilation();
 #endif
 
+	void ActivateSpecialAbility();
+
 	TSoftObjectPtr<class AGCBaseCharacter> CachedBaseCharacter;
 	
 private:

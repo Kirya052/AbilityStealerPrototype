@@ -380,6 +380,22 @@ UGCCharacterAttributeSet* AGCBaseCharacter::GetCharacterAttributeSet()
 	return AttributeSet;
 }
 
+void AGCBaseCharacter::SetSpecialAbility(FSpecialAbilityStruct SpecialAbilityStruct)
+{
+	SpecialAbilityTag = SpecialAbilityStruct.AbilityTag;
+	AbilityCount = SpecialAbilityStruct.AbilityCount;
+}
+
+void AGCBaseCharacter::ActivateSpecialAbility()
+{
+	AbilitySystemComponent->TryActivateAbilityWithTag(SpecialAbilityTag);
+}
+
+bool AGCBaseCharacter::CanActivateSpecialAbility()
+{
+	return AbilityCount > 0;
+}
+
 bool AGCBaseCharacter::CanJumpInternal_Implementation() const
 {
 	return Super::CanJumpInternal_Implementation() && !GetBaseCharacterMovementComponent()->IsMantling();

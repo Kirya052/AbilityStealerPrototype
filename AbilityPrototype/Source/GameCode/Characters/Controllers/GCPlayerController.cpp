@@ -56,6 +56,7 @@ void AGCPlayerController::SetupInputComponent()
 	InputComponent->BindAction("PreviousItem", EInputEvent::IE_Pressed, this, &AGCPlayerController::PreviousItem);
 	InputComponent->BindAction("PrimaryMeleeAttack", EInputEvent::IE_Pressed, this, &AGCPlayerController::PrimaryMeleeAttack);
 	InputComponent->BindAction("SecondaryMeleeAttack", EInputEvent::IE_Pressed, this, &AGCPlayerController::SecondaryMeleeAttack);
+	InputComponent->BindAction("SpecialAbility", EInputEvent::IE_Pressed, this, &AGCPlayerController::ActivateSpecialAbility);
 #if UE_BUILD_DEBUG || UE_BUILD_DEVELOPMENT
 	InputComponent->BindAction("Debug_IncreaseGlobalDilation", EInputEvent::IE_Pressed, this, &AGCPlayerController::Debug_IncreaseGlobalDilation);
 	InputComponent->BindAction("Debug_DecreaseGlobalDilation", EInputEvent::IE_Pressed, this, &AGCPlayerController::Debug_DecreaseGlobalDilation);
@@ -267,6 +268,14 @@ void AGCPlayerController::SecondaryMeleeAttack()
 	if (CachedBaseCharacter.IsValid())
 	{
 		CachedBaseCharacter->SecondaryMeleeAttack();
+	}
+}
+
+void AGCPlayerController::ActivateSpecialAbility()
+{
+	if (CachedBaseCharacter.IsValid())
+	{
+		CachedBaseCharacter->ActivateSpecialAbility();
 	}
 }
 
